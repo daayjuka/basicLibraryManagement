@@ -33,4 +33,9 @@
       <Filter>Üst Bilgi Dosyaları</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="allBooks.txt">
+      <Filter>Kaynak Dosyalar</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

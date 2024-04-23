@@ -20,10 +20,11 @@ void Library::displayAllBooks()
     else{
         int count = 1;
         for (Book obj : allBooks) {
+            std::cout << std::endl;
             std::cout << "--" << count << "." << "Book--" << std::endl;
             std::cout << "Title:  " << obj.getTitle() << std::endl;
             std::cout << "Author:  " << obj.getAuthor() << std::endl;
-            std::cout << "Publish Year:  " << obj.getPublishYear() << std::endl;
+            std::cout << "Publish Year:  " << obj.getPublishYear() << std::endl << std::endl;
             count++;
         }
     }
