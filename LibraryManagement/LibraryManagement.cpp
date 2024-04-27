@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <fstream>
 #include <cstdio>
+#include <sstream>
+#include <limits>
 
 void seperateString(std::string sentence, std::string* title, std::string* author, std::string* year);
 
@@ -45,49 +47,57 @@ int main()
 		else if (choice == "2")
 		{
 			//variables
-			int index1, index2, yearint;
-			std::string sentence, title, author, year;
+			//int index1, index2;
+			int year;
+			std::string title, author;
 			//book info
-			std::cout << "Please give the book informations(Title/Author/Year-Seperated with space): ";
+			std::cout << "Please give the book title: ";
 			std::cin.ignore();
-			std::getline(std::cin, sentence);
+			std::getline(std::cin, title);
+			std::cout << "Please give the book author: ";
+			std::getline(std::cin, author);
+			while(true){
+				std::cout << "Please give the book publish year: ";
+				std::cin >> year;
+				
+				if (std::cin.fail()) {
+					std::cin.clear();
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::cout << "Invalid input! Year must be number. Please give valid input" << std::endl;
+				}
+				else {
+					break;
+				}
+
+			}
 
 			std::cout << std::endl;
 
-			std::string::difference_type countOfSpace = std::count(sentence.begin(), sentence.end(), ' ');
-
-			if(sentence.empty()){
-				std::cout << "Please give valid an input";
-			}
-			else{
-				if(countOfSpace == 2){
-					std::vector<Book> tempBookVec;
-					//seperates string
-					seperateString(sentence, &title, &author, &year);
-					yearint = std::stoi(year);
-					//create object
-					Book tempBook;
-					tempBook.setTitle(title);
-					tempBook.setAuthor(author);
-					tempBook.setYear(yearint);
-					// add to library
-					tempBookVec.push_back(tempBook);
-					writeBooksToFile(tempBookVec, "allBooks.txt");
-					kutuphane.addBook(tempBook);
-				}
-				else {
-					std::cout << std::endl;
-					std::cerr << "PLEASE GIVE VALID BOOK INFOS" << std::endl << std::endl;
-				}
-			}
+			//std::string::difference_type countOfSpace = std::count(sentence.begin(), sentence.end(), ' ');
+			//seperates string
+			//seperateString(sentence, &title, &author, &year);
+			//yearint = std::stoi(year);
+			//create object
+			Book tempBook;
+			tempBook.setTitle(title);
+			tempBook.setAuthor(author);
+			tempBook.setYear(year);
+			// add to library
+			std::vector<Book> tempBookVec;
+			tempBookVec.push_back(tempBook);
+			writeBooksToFile(tempBookVec, "allBooks.txt");
+			kutuphane.addBook(tempBook);
+		
+		
 		}
 		else if (choice == "3")
 		{
 			std::vector<Book> tempforDelete;
 			std::string del;
 			std::cout << "\t  Choose title or author to remove book!" << std::endl << std::endl;
-			std::cout << "\t= ";
-			std::cin >> del;
+			std::cout << "  => ";
+			std::cin.ignore();
+			std::getline(std::cin , del);
 
 			tempforDelete = readBooksFromFile("allBooks.txt");
 
@@ -100,10 +110,16 @@ int main()
 				{
 					it++;
 				}
-
 			}
+			if (it == tempforDelete.end()) {
+				std::cout << std::endl;
+				std::cout << "There is not any author or title in this library" << std::endl << std::endl;
+			}
+			else{
 			deleteBookFromFile(*it, "allBooks.txt");
 			kutuphane.removeBook(del);
+			}
+
 		}
 		else if (choice == "EXIT" || choice == "Exit" || choice == "exit")
 		{
@@ -134,7 +150,7 @@ void writeBooksToFile(std::vector<Book>& books, const std::string& filename) {
 	std::ofstream outFile(filename, std::ios_base::app);
 	if (outFile.is_open()) {
 		for (auto& book : books) {
-			outFile << book.getTitle() << " " << book.getAuthor() << " " << book.getPublishYear() << std::endl;
+			outFile << book.getTitle() << "_" << book.getAuthor() << "_" << book.getPublishYear() << std::endl;
 		}
 		outFile.close();
 	}
@@ -147,10 +163,14 @@ std::vector<Book> readBooksFromFile(const std::string& filename) {
 	std::vector<Book> books;
 	std::ifstream inFile(filename);
 	if (inFile.is_open()) {
-		std::string title, author;
-		int year;
-		while (inFile >> title >> author >> year) {
-			books.emplace_back(title, author, year);
+		std::string line;
+		while (std::getline(inFile,line)) {
+			std::istringstream iss(line);
+			std::string title_str, author_str, year_str;
+			if (std::getline(iss, title_str, '_') && std::getline(iss, author_str, '_') && std::getline(iss, year_str, '_')) {
+				int year = std::stoi(year_str);
+				books.emplace_back(title_str, author_str, year);
+			}
 		}
 		inFile.close();
 	}
@@ -168,7 +188,7 @@ void deleteBookFromFile(Book& target, const std::string& filename) {
 
 		for (auto& book : books) {
 			if (!(book.getTitle() == target.getTitle() && book.getAuthor() == target.getAuthor() && book.getPublishYear() == target.getPublishYear())) {
-				outFile << book.getTitle() << " " << book.getAuthor() << " " << book.getPublishYear() << std::endl;
+				outFile << book.getTitle() << "_" << book.getAuthor() << "_" << book.getPublishYear() << std::endl;
 			}
 		}
 		outFile.close();
